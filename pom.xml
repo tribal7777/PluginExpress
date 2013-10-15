@@ -20,7 +20,8 @@
 		<module>routes</module>
 		<module>cache-control</module>
 		<module>metrics</module>
-	</modules>
+        <module>thalassa</module>
+    </modules>
 
 	<dependencies>
 		<dependency>

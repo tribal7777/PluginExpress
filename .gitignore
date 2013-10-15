@@ -2,7 +2,10 @@ out/
 build/
 bin/
 target/
+*.iml
+.idea
 .DS_Store
 .project
 .classpath
 .settings
+dump.rdb

@@ -17,22 +17,25 @@ package com.strategicgains.restexpress.plugin.thalassa;
 
 import com.strategicgains.restexpress.RestExpress;
 import com.strategicgains.restexpress.plugin.AbstractPlugin;
+import com.strategicgains.restexpress.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 /**
  *
  */
 public final class ThalassaPlugin extends AbstractPlugin {
 
-    private final String aqueductUrl;
-    private final String thalassaUrl;
-    private final String frontendBind;
-    private final int    registrationRefreshInterval;
-    private final String appHost;
-    private final int    appPort;
-    private final String appName;
-    private final String version;
+    private String aqueductUrl;
+    private String thalassaUrl;
+    private String frontendBind;
+    private int    registrationRefreshInterval;
+    private String appHost;
+    private int    appPort;
+    private String appName;
+    private String version;
 
     private static final Logger LOG = LoggerFactory.getLogger(ThalassaPlugin.class);
 
@@ -40,23 +43,88 @@ public final class ThalassaPlugin extends AbstractPlugin {
     /**
      *
      * @param thalassaUrl
-     * @param aqueductUrl
-     * @param frontendBind
-     * @param appHost
-     * @param appPort
-     * @param appName
-     * @param version
-     * @param registrationRefreshInterval
+     * @return
      */
-    public ThalassaPlugin(String thalassaUrl, String aqueductUrl, String frontendBind, String appHost, int appPort, String appName, String version, int registrationRefreshInterval) {
+    public ThalassaPlugin thalassaURL(String thalassaUrl) {
         this.thalassaUrl = thalassaUrl;
+        return this;
+    }
+
+
+    /**
+     *
+     * @param aqueductUrl
+     * @return
+     */
+    public ThalassaPlugin aqueductURL(String aqueductUrl) {
         this.aqueductUrl = aqueductUrl;
-        this.frontendBind = frontendBind;
-        this.registrationRefreshInterval = registrationRefreshInterval;
-        this.appHost = appHost;
-        this.appPort = appPort;
-        this.appName = appName;
+        return this;
+    }
+
+
+    /**
+     *
+     * @param version
+     * @return
+     */
+    public ThalassaPlugin appVersion(String version) {
         this.version = version;
+        return this;
+    }
+
+
+    /**
+     *
+     * @param appName
+     * @return
+     */
+    public ThalassaPlugin appName(String appName) {
+        this.appName = appName;
+        return this;
+    }
+
+
+    /**
+     *
+     * @param appPort
+     * @return
+     */
+    public ThalassaPlugin appPort(Integer appPort) {
+        this.appPort = appPort;
+        return this;
+    }
+
+
+    /**
+     *
+     * @param appHost
+     * @return
+     */
+    public ThalassaPlugin appHost( String appHost) {
+        this.appHost = appHost;
+        return this;
+    }
+
+
+    /**
+     *
+     * @param frontendBind
+     * @return
+     */
+    public ThalassaPlugin frontendBindAddress(String frontendBind) {
+        this.frontendBind = frontendBind;
+        return this;
+    }
+
+
+    /**
+     *
+     * @param registrationRefreshInterval
+     * @return
+     */
+    public ThalassaPlugin registrationRefreshInterval(Integer registrationRefreshInterval) {
+        this.registrationRefreshInterval = registrationRefreshInterval;
+        return this;
     }
 
 
@@ -69,21 +137,56 @@ public final class ThalassaPlugin extends AbstractPlugin {
     @Override
     public ThalassaPlugin register(RestExpress server) {
         try {
-            // Create HaProxy Backend
-            ThalassaAqueductService.createBackendRegistration(aqueductUrl, appName, version);
+            if(requiredPropertiesArePresent(this))  {
+                // Create HaProxy Backend
+                ThalassaAqueductService.createBackendRegistration(aqueductUrl, appName, version);
 
-            // Create HaProxy Frontend
-            ThalassaAqueductService.createFrontendRegistration(aqueductUrl, appName, frontendBind, appName);
+                // Create HaProxy Frontend
+                ThalassaAqueductService.createFrontendRegistration(aqueductUrl, appName, frontendBind, appName);
 
-            // Run registrations
-            RegistrationScheduler scheduler = new RegistrationScheduler(thalassaUrl, appHost, appPort, appName, version, registrationRefreshInterval);
-            scheduler.run();
-
+                // Run registrations
+                RegistrationScheduler scheduler = new RegistrationScheduler(thalassaUrl, appHost, appPort, appName, version, registrationRefreshInterval);
+                scheduler.run();
+            }
         }
         catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
         return this;
     }
+
+
+    /**
+     *
+     * @param plugin
+     * @return
+     */
+    private static Boolean requiredPropertiesArePresent(ThalassaPlugin plugin) {
+        verifyStringProperty("Aqueduct URL", plugin.aqueductUrl);
+        verifyStringProperty("Thalassa URL", plugin.thalassaUrl);
+        verifyStringProperty("Frontend Bind", plugin.frontendBind);
+        verifyIntegerProperty("Registration Refresh Interval", plugin.registrationRefreshInterval);
+        verifyStringProperty("Application Host", plugin.appHost);
+        verifyIntegerProperty("Application Port", plugin.appPort);
+        verifyStringProperty("Application Name", plugin.appName);
+        verifyStringProperty("Application Version", plugin.version);
+
+        return Boolean.TRUE;
+    }
+
+
+    private static void verifyStringProperty(String propertyName, String propertyValue) {
+        if(propertyValue == null) {
+            throw new RuntimeException("The Thalassa Plugin requires " + propertyName + " to be set.");
+        }
+    }
+
+
+    private static void verifyIntegerProperty(String propertyName, Integer propertyValue) {
+        if(propertyValue <= 0) {
+           throw new RuntimeException("The Thalassa Plugin requires " + propertyName + " to be set.");
+        }
+
+    }
+
 }

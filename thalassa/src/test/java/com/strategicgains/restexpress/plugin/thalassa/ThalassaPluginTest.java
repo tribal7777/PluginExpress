@@ -16,5 +16,56 @@
 package com.strategicgains.restexpress.plugin.thalassa;
 
 
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 public final class ThalassaPluginTest {
+
+
+    @Test
+    public void testStringPropertyIsNotSet() {
+        try {
+            new ThalassaPlugin()
+                .appHost("1.2.3.4")
+                .appName("Name")
+                .appPort(80)
+                .appVersion("1.2.3")
+                .aqueductURL("http://aqueduct")
+                .frontendBindAddress("*:80")
+                .registrationRefreshInterval(2)
+                .thalassaURL(null)
+                .register(null);
+            fail();
+        }
+        catch(Exception e) {
+            String message = e.getMessage();
+            String expectedMessage = "java.lang.RuntimeException: The Thalassa Plugin requires Thalassa URL to be set.";
+            assertEquals(expectedMessage, message);
+        }
+    }
+
+
+    @Test
+    public void testIntegerPropertyIsNotSet() {
+        try {
+            new ThalassaPlugin()
+                    .appHost("1.2.3.4")
+                    .appName("Name")
+                    .appPort(80)
+                    .appVersion("1.2.3")
+                    .aqueductURL("http://aqueduct")
+                    .frontendBindAddress("*:80")
+                    .registrationRefreshInterval(0)
+                    .thalassaURL("http://thalassa")
+                    .register(null);
+            fail();
+        }
+        catch(Exception e) {
+            String message = e.getMessage();
+            String expectedMessage = "java.lang.RuntimeException: The Thalassa Plugin requires Registration Refresh Interval to be set.";
+            assertEquals(expectedMessage, message);
+        }
+    }
 }

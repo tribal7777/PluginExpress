@@ -52,15 +52,6 @@ as necessary, using method chaining if desired.
 ```java
 RestExpress server = new RestExpress()...
 
-new CorsHeaderPlugin("*")							// Array of domain strings.
-	.exposeHeaders("Location")						// Array of header names (Optional).
-	.allowHeaders("Content-Type", "Accept")			// Array of header names (Optional).
-	.maxAge(2592000)								// Seconds to cache (Optional).
-	.flag("flag value")								// Just like flag() on Routes (Optional).
-	.parameter("string", object)					// Just like parameter() on Routes (Optional).
-	.register(server);
-
-
 new ThalassaPlugin()
     .appHost("1.2.3.4")               // The host IP your application is running on
     .appName("Name")                  // The name of your application
